@@ -1,0 +1,4 @@
+Magne-b6	12.49	100
+Allegra	8.29	200
+WitaminaB	2.99	1000
+Polopir	5.99	30
