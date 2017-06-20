@@ -1,204 +1,233 @@
-//Krzysztof Zawadzki
 #include <iostream>
-#include <ctime>
 #include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
-struct ListNode
+struct OneWayNode
 {
-	int value;
-	ListNode* next;
-	ListNode* prev;
+    int value;
+    OneWayNode *next;
+};
+struct TwoWayNode
+{
+    int value;
+    TwoWayNode *prev, *next;
 };
 
-struct TwoWaysList
-{
-	ListNode* head;
-	ListNode* tail;
-};
+OneWayNode* CreateList(int _min, int _max, unsigned int _n);
+TwoWayNode* CreateList(OneWayNode* _list, float _avg);
 
-ListNode* CreateOneWayList(int _min, int _max, int _elementsCount);
-float Averange(ListNode* _list);
-TwoWaysList CreateTwoWaysList(ListNode* _odList, float _avg);
-void DisplayList(ListNode* _list);
-void DeleteList(ListNode* _list);
-void Insert(ListNode* _list, int _value, int& _listSize);
-ListNode* DeleteNegative(ListNode* _list);
-bool Find(TwoWaysList _list, int value);
+float Averange(OneWayNode * _list);
+
+void Insert(OneWayNode* _list, int _pos, int _value);
+
+void DeleteFirstNegative(TwoWayNode *& _list);
+
+void DeleteList(OneWayNode* _list);
+void DeleteList(TwoWayNode* _list);
+
+void Display(OneWayNode* _list);
+void Display(TwoWayNode* _list);
+
+inline TwoWayNode* GoToStart(TwoWayNode* _list);
 
 int main(int argc, char **argv)
 {
-	srand(time(0));
-	int n = 0;
-	do
-	{
-		cout << "Wprodzac liczbe elementow listy(>0): ";
-		cin >> n;
-	} while (n < 1);
-	int findValue;
-	float avg;
-	ListNode *OWlist = CreateOneWayList(-100, 100, n);
-	cout << "Lista wylosowanych wartosci:\n";
-	DisplayList(OWlist);
-	avg = Averange(OWlist);
-	TwoWaysList TWlist = CreateTwoWaysList(OWlist, avg);
-	cout << "\nSrednia z wartosci na liscie: " << avg << '\n';
-	Insert(OWlist, n, n);
-	cout << "\nLista wartosci wiekszych od sredniej:\n";
-	DisplayList(TWlist.head);
-	cout << "\nLista jednokierunkowa po zmianach (4):\n";
-	DisplayList(OWlist);
-	OWlist = DeleteNegative(OWlist);
-	cout << "\nLista jednokierunkowa po zmianach (5):\n";
-	DisplayList(OWlist);
-	cout << "\nJakiej wartosci szukasz w liscie dwukierunkowej: ";
-	cin >> findValue;
-	if (Find(TWlist, findValue))
-		cout << "Znaleziono taki element\n";
-	else
-		cout << "Nie ma takiego elementu\n";
-	DeleteList(OWlist);
-	DeleteList(TWlist.head);
-	OWlist = 0;
-	system("pause");
-	return 0;
+    int n = 0;
+    OneWayNode* jednokierunkowa = 0;
+    TwoWayNode* dwukierunkowa = 0;
+    float srednia;
+    srand(time(0));
+    do
+    {
+        cout << "Wprowadz liczbe elementow listy jednokierunkowej(>0): ";
+        cin >> n;
+    }while(n <= 0);
+
+    //Tworzenie listy jednokierunkowej
+    jednokierunkowa = CreateList(-100,100,n);
+    cout << "Lista jednokierunkowa przed modywikacja\n";
+    Display(jednokierunkowa);
+    //Wyznaczanie sredniej
+    srednia = Averange(jednokierunkowa);
+    cout << "Srednia: " << srednia << endl;
+
+    //Tworzenie listy dwukierunkowej
+    dwukierunkowa = CreateList(jednokierunkowa, srednia);
+    cout << "Lista dwukierunkowa przed modywikacja\n";
+    Display(dwukierunkowa);
+
+    //Dodawanie rozmiaru listy na przedostadnie miejsce
+    Insert(jednokierunkowa,n-1,n);
+    cout << "Lista jednokierunkowa po modywikacji\n";
+    Display(jednokierunkowa);
+    //Usuwanie pierwszej ujemnej wartosci
+    DeleteFirstNegative(dwukierunkowa);
+    cout << "Lista dwukierunkowa po modywikacji\n";
+    Display(dwukierunkowa);
+
+    //kasowanie list z pamieci
+    DeleteList(jednokierunkowa);
+    DeleteList(dwukierunkowa);
+    jednokierunkowa = 0;
+    dwukierunkowa = 0;
+    return 0;
 }
 
-ListNode * CreateOneWayList(int _min, int _max, int _elementsCount)
+OneWayNode* CreateList(int _min, int _max, unsigned int _n)
 {
-	int range = _max - _min + 1;
-	ListNode * const start = new ListNode;
-	ListNode* iterator = start;
+    if(_n == 0) return 0;
+    int range = _max - _min + 1;
+	OneWayNode * const start = new OneWayNode;
+	OneWayNode* iter = start;
 	start->value = (rand() % range) + _min;
-	start->next = 0;
-	start->prev = 0;
-	for (int i = 1; i < _elementsCount; i++)
+	for (unsigned int i = 1; i < _n; i++)
 	{
-		iterator->next = new ListNode;
-		iterator = iterator->next;
-		iterator->value = (rand() % range) + _min;
-		iterator->next = 0;
-		iterator->prev = 0;
+		iter->next = new OneWayNode;
+		iter = iter->next;
+		iter->value = (rand() % range) + _min;
 	}
+	iter->next = 0;
 	return start;
 }
-
-float Averange(ListNode * _list)
+float Averange(OneWayNode * _list)
 {
 	if (_list == 0) return -1.f;
 	float sum = 0.f;
 	float elementsCount = 0.0;
-	ListNode* iterator = _list;
+	OneWayNode* iter = _list;
 	do
 	{
-		sum += iterator->value;
+		sum += iter->value;
 		elementsCount += 1.f;
-	} while ((iterator = iterator->next) != 0);
+	} while ((iter = iter->next) != 0);
 	return sum/elementsCount;
 }
 
-TwoWaysList CreateTwoWaysList(ListNode * _odList, float _avg)
+TwoWayNode* CreateList(OneWayNode* _list, float _avg)
 {
-	if (_odList == 0)
-		return TwoWaysList{ 0,0 };
-	ListNode* const start = new ListNode;
-	TwoWaysList result;
-	result.head = start;
-	ListNode* iterator = 0;
+    if (_list == 0)
+		return 0;
+	TwoWayNode* const start = new TwoWayNode;
+	TwoWayNode* iter = 0;
 	do
 	{
-		if (_odList->value > _avg)
-			if (!iterator)
+		if (_list->value > _avg)
+			if (!iter)
 			{
-				start->value = _odList->value;
+				start->value = _list->value;
 				start->prev = 0;
-				start->next = 0;
-				iterator = start;
+				iter = start;
 			}
 			else
 			{
-				iterator->next = new ListNode;
-				iterator->next->value = _odList->value;
-				iterator->next->prev = iterator;
-				iterator = iterator->next;
-				iterator->next = 0;
+				iter->next = new TwoWayNode;
+				iter->next->value = _list->value;
+				iter->next->prev = iter;
+				iter = iter->next;
 			}
 		else;
-	}while ((_odList = _odList->next) != 0);
-	result.tail = iterator;
-	return result;
+	}while ((_list = _list->next) != 0);
+	iter->next = 0;
+	return start;
 }
-
-void DisplayList(ListNode * _list)
+void Insert(OneWayNode* _list, int _pos, int _value)
 {
-	if (_list == 0) return;
-	cout << _list->value;
-	while ((_list = _list->next) != 0)
+	if (!_list) return;
+	//przechodzimy do elementu podanego w arkumencie _pos
+	for (int i = 1; i < _pos; i++)
+		_list = _list->next;
+
+	OneWayNode* temp = _list->next;
+	_list->next = new OneWayNode;
+	_list = _list->next;
+	_list->value = _value;
+	_list->next = temp;
+}
+void DeleteFirstNegative(TwoWayNode *& _list)
+{
+
+	if (!_list) return;
+	TwoWayNode* const start = GoToStart(_list);
+	TwoWayNode* temp;
+	//Jezeli pierwszy element listy jest ujemny
+	if (start->value < 0)
 	{
-		cout << ((_list->prev == 0) ? "--->" : "<--->") << '(' << _list->value << ')';
+		temp = _list->next;
+		delete _list;
+		temp->prev = 0;
+		_list = temp;
 	}
-	cout << '\n';
-}
+	_list = start;
+    while (_list->value >= 0 && (_list->next))
+       _list = _list->next;
+    //Jezeli petla zostala przerwana przez drugi warunek (_list->next == 0)
+    if(_list->value >= 0) return;
+    //Jezeli petla zostala przerwana przez pierwszy warunek list->value < 0)
+	temp = _list->prev;
+	TwoWayNode* temp2 = _list->next;
+	delete _list;
+	if(temp2)
+    {
+        temp2->prev = temp;
 
-void DeleteList(ListNode * _list)
+    }
+    temp->next = temp2;
+    _list = start;
+}
+void DeleteList(OneWayNode* _list)
 {
-	ListNode* prev;
-	ListNode* temp = _list;
+    if(!_list) return;
+    OneWayNode* prev;
+	OneWayNode* temp = _list;
 	while (temp->next != 0)
 	{
 		prev = temp;
 		temp = prev->next;
 		delete prev;
-	} 
+	}
 	if (temp != 0)
 		delete temp;
-	
 }
-
-void Insert(ListNode* _list, int _value, int& _listSize)
+void DeleteList(TwoWayNode* _list)
 {
-	if (!_list) return;
-	for (int i = 0; i < _listSize - 2; i++)
-		_list = _list->next;
-	ListNode* temp = _list->next;
-	_list->next = new ListNode;
-	//_list->next = _list;
-	_list = _list->next;
-	_list->value = _value;
-	_list->next = temp;
-	_list->prev = 0;
-	_listSize++;
-}
-
-ListNode* DeleteNegative(ListNode * _list)
-{
-	ListNode* const start = _list;
-	if (!_list) return _list;
-	ListNode* temp = _list;
-	if (_list->value < 0)
+    if(!_list) return;
+    _list = GoToStart(_list);
+    TwoWayNode* prev;
+	TwoWayNode* temp = _list;
+	while (temp->next != 0)
 	{
-		temp = _list->next;
-		delete _list;
-		return temp;
+		prev = temp;
+		temp = prev->next;
+		delete prev;
 	}
-	while (_list->next->value >= 0)
-		_list = _list->next;
-	temp = _list;
-	_list = _list->next;
-	ListNode* temp2 = _list->next;
-	delete _list;
-	temp->next = temp2;
-	return start;
+	if (temp != 0)
+		delete temp;
 }
-
-bool Find(TwoWaysList _list, int value)
+void Display(OneWayNode* _list)
 {
-	ListNode *temp = _list.head;
-	while (temp)
-		if (temp->value == value)
-			return true;
-		else
-			temp = temp->next;
-	return false;
+    if (_list == 0) return;
+	cout << '('<<_list->value<< ')';
+	while ((_list = _list->next) != 0)
+	{
+		cout << "--->" << '(' << _list->value << ')';
+	}
+	cout << '\n';
+}
+void Display(TwoWayNode* _list)
+{
+    if (_list == 0) return;
+    _list = GoToStart(_list);
+	cout << '('<<_list->value<< ')';
+	while ((_list = _list->next) != 0)
+	{
+		cout << "<===>" << '(' << _list->value << ')';
+	}
+	cout << '\n';
+}
+inline TwoWayNode* GoToStart(TwoWayNode* _list)
+{
+    while(_list->prev != 0) _list = _list->prev;
+    return _list;
 }
