@@ -5,7 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <string>
-
+#define DELTATIME 1e-4
 
 struct Data
 {
@@ -24,13 +24,17 @@ using namespace std;
 
 void Calculate(double _T, double _A, double _phi, double _deltaTime, vector<Data>& _out);
 bool SaveToFile(string _filepath, vector<Data>& _data);
+
+
+
 int main(int argc, char **argv)
 {
 	string filepath = "dane.txt";
 	double okres = 1.0;
 	double amplituda = 1.0;
 	double faza = 0.0;
-	double delta = 1e6;
+    double time;
+	
 	double temp;
 	string tempfp;
 	vector<Data> wyniki;
@@ -44,15 +48,18 @@ int main(int argc, char **argv)
 
 	cout << "Podaj wartosc przesuniecie fazowe [rad]: ";
 	cin >> faza;
-	cout << "Podaj czestosc probkowania [s]: ";
-	cin >> delta;
-
-	cin.ignore(256, '\n');//czyszczenie cin
+    do
+    {
+	    cout << "Podaj czas symulacji [s]: ";
+	    cin >> time;
+    }while(time <= 0.0);
+	cin.ignore(256,'\n');//czyszczenie cin
 	cout << "Podaj nazwe pliku do ktorego zapisac dane: ";
 	getline(cin, tempfp);
+    cin.sync();
 	if (cin.good()) filepath = tempfp;
 
-	Calculate(okres, amplituda, faza, delta, wyniki);
+	Calculate(okres, amplituda, faza, time, wyniki);
 	if (SaveToFile(filepath, wyniki))
 		cout << "Zapisano to pliku " << filepath << '\n';
 	else
@@ -61,18 +68,18 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void Calculate(double _T, double _A, double _phi, double _deltaTime, vector<Data>& _out)
+void Calculate(double _T, double _A, double _phi, double _time, vector<Data>& _out)
 {
 	double time = 0.0;
 	Data temp;
 	_out.clear();
-	while (time <= _T)
+	while (time <= _time)
 	{
 		temp.m_time = time;
 		temp.m_x = _A*sin((((2.0*M_PI)/_T)*time) + _phi);
 		temp.m_force = -temp.m_x;
 		_out.push_back(temp);
-		time += _deltaTime;
+		time += DELTATIME;
 	}
 }
 

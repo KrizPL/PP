@@ -10,12 +10,11 @@ using namespace std;
 	cin >> jr; \
 	} while (jr == 't' || jr == 'T');
 
-string convert(int _value, int _base, const string _dirct[]);
+void convert(int _value, int _base);
 
 int main(int argc, char **argv)
 {
-	string dictionary[] = { "0","1","2","3","4","5","6","7","8",
-		"9","A","B","C","D","E","F" };
+
 	int value;
 	int base;
 	REPEAT_START
@@ -30,22 +29,39 @@ int main(int argc, char **argv)
 			cout << "Wpisz podstawe systemu(2, 8 lub 16)\n";
 			cin >> base;
 		} while (base != 2 && base != 8 && base != 16);
-		cout << "Liczba w systemie " << base << " to " << convert(value, base, dictionary) << '\n';
+		cout << "Liczba w systemie " << base << " to "; convert(value, base); cout << '\n';
 	REPEAT_END
 	return 0;
 }
 
-string convert(int _value, int _base, const string _dirct[])
+void convert(int _value, int _base)
 {
-
-	if (_value == 1)
-		return "1";
-	else
-	{
-		int mumber = _value%_base;
-		if((_value / _base) != 0)
-			return convert(_value/_base,_base,_dirct)+_dirct[mumber];
-		else return _dirct[mumber];
-	}
-	
+    if(_value/_base != 0)
+        convert(_value/_base,_base);
+    int b= _value%_base;
+    if(b < 10) cout << b;
+        else
+        {
+            switch(b)
+            {
+            case 10:
+                cout << 'a';
+                break;
+            case 11:
+                cout << 'b';
+                break;
+            case 12:
+                cout << 'c';
+                break;
+            case 13:
+                cout << 'd';
+                break;
+            case 14:
+                cout << 'e';
+                break;
+            case 15:
+                cout << 'f';
+                break;
+            }
+        }
 }

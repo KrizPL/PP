@@ -31,7 +31,8 @@ int main()
 		cin.ignore(256,'\n');//czyszczenie cin
 		cout << "Podaj nazwe pliku w ktorym dane zostana zapisane: ";
 		getline(cin, filepath);
-		cin.ignore(filepath.size()+1, '\n');//czyszczenie cin
+		//cin.ignore(INT_MAX);//czyszczenie cin
+        cin.sync();
 		if (!WriteToFile(filepath.c_str(), Data, 200))
 			cout << "Nie mozna utworzyc pliku "<<filepath<<'\n';
 		else
