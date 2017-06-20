@@ -22,7 +22,7 @@ float Averange(OneWayNode * _list);
 
 void Insert(OneWayNode* _list, int _pos, int _value);
 
-void DeleteFirstNegative(TwoWayNode *& _list);
+void DeleteFirstNegative(TwoWayNode * _list);
 
 void DeleteList(OneWayNode* _list);
 void DeleteList(TwoWayNode* _list);
@@ -30,7 +30,11 @@ void DeleteList(TwoWayNode* _list);
 void Display(OneWayNode* _list);
 void Display(TwoWayNode* _list);
 
+bool Find(TwoWayNode* _list, int _value); 
+
 inline TwoWayNode* GoToStart(TwoWayNode* _list);
+
+
 
 int main(int argc, char **argv)
 {
@@ -66,7 +70,13 @@ int main(int argc, char **argv)
     DeleteFirstNegative(dwukierunkowa);
     cout << "Lista dwukierunkowa po modywikacji\n";
     Display(dwukierunkowa);
-
+    cout << "Jakiego element chcesz znalezc na liscie dwukierunkowej: ";
+    cin >> n;
+    //Szukanie elementu
+    if(Find(dwukierunkowa, n))
+        cout << "Znaleziono element\n";
+    else
+        cout << "Nie ma takiego elementu\n";
     //kasowanie list z pamieci
     DeleteList(jednokierunkowa);
     DeleteList(dwukierunkowa);
@@ -145,7 +155,7 @@ void Insert(OneWayNode* _list, int _pos, int _value)
 	_list->value = _value;
 	_list->next = temp;
 }
-void DeleteFirstNegative(TwoWayNode *& _list)
+void DeleteFirstNegative(TwoWayNode * _list)
 {
 
 	if (!_list) return;
@@ -215,6 +225,16 @@ void Display(OneWayNode* _list)
 	}
 	cout << '\n';
 }
+
+bool Find(TwoWayNode* _list, int _value)
+{
+    if(!_list) return false;
+    do
+        if(_list->value == _value) return true;
+    while((_list = _list->next) != 0);
+    return false; 
+}
+
 void Display(TwoWayNode* _list)
 {
     if (_list == 0) return;
